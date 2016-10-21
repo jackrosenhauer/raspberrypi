@@ -20,10 +20,4 @@ board.on("ready", function() {
     console.log(this.celsius + "°C");
     // console.log("0x" + this.address.toString(16));
   });
-
-  temperature.on("data", function() {
-    console.log("celsius: %d", this.C);
-    console.log("fahrenheit: %d", this.F);
-    console.log("kelvin: %d", this.K);
-  });
 });
