@@ -4,14 +4,10 @@
 console.log("api...");
 
 var express = require("express");
-var exphbs = require("express-handlebars");
 var session = require("express-session");
 
 
 var api = express();
-
-api.engine('handlebars', exphbs({defaultLayout: 'main'}));
-api.set('view engine', 'handlebars');
 
 api.use(session({
     secret: '2C44-4D44-WppQ38S',
@@ -30,7 +26,7 @@ var auth = function(req, res, next) {
 
 api.get("/", auth, function(req, res){
     //send base html
-    res.render('home');
+    res.send('home');
 });
 
 api.get("/test", function(req, res){
