@@ -23,7 +23,11 @@ module.exports = function(environment) {
     }
   };
 
+
   if (environment === 'development') {
+    ENV.contentSecurityPolicy = {
+      'connect-src': "'self' http://localhost:7710"
+    }
     // ENV.APP.LOG_RESOLVER = true;
     // ENV.APP.LOG_ACTIVE_GENERATION = true;
     // ENV.APP.LOG_TRANSITIONS = true;
