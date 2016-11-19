@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "johnny-five": "^0.10.3"
-  },
-  "devDependencies": {
+    "express": "^4.14.0",
+    "express-handlebars": "^3.0.0",
+    "express-session": "^1.14.2",
     "johnny-five": "^0.10.3"
   },
   "scripts": {
