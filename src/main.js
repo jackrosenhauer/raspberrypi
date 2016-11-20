@@ -34,7 +34,7 @@ api.get("/test", function(req, res){
 });
 
 api.get("/api/v1/temperature-records", function(req, res){
-  res.send("YAY");
+  res.sent("YAY");
 });
 
 api.post("/login", function(req, res){
