@@ -4,18 +4,20 @@ var fs        = require("fs");
 var path      = require("path");
 var Sequelize = require("sequelize");
 var env       = process.env.NODE_ENV || "development";
-var config    = require(path.join(__dirname, '..', 'config', 'config.json'))[env];
+// var config    = require(path.join(__dirname, '..', 'config', 'config.json'))[env];
 if (process.env.DATABASE_URL) {
   var sequelize = new Sequelize(process.env.DATABASE_URL);
 } else {
-  var sequelize = new Sequelize(config.database, config.username, config.password, config);
+  var sequelize = new Sequelize('gardening_app', 'root', null, {
+    dialect: 'postgres'
+  });
 }
-var db        = {};
+var db = {};
 
 fs
   .readdirSync(__dirname)
   .filter(function(file) {
-    return (file.indexOf(".") !== 0) && (file !== "index.js");
+    return (file.indexOf(".") !== 0) && (file !== "index.js") && (!file.endsWith('.swp'));
   })
   .forEach(function(file) {
     var model = sequelize.import(path.join(__dirname, file));

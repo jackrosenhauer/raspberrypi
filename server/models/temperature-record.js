@@ -1,10 +1,10 @@
 module.exports = function(sequelize, DataTypes) {
-  var TemperatureEntry = sequelize.define("TemperatureEntry", {
-    temperature: DataTypes.STRING
+  var TemperatureRecord = sequelize.define("TemperatureRecord", {
+    temperature: DataTypes.FLOAT
   }, {
     classMethods: {
       associate: function(models) {
-        TemperatureEntry.belongsTo(models.Sensor, {
+        TemperatureRecord.belongsTo(models.Sensor, {
           onDelete: "CASCADE",
           foreignKey: {
             allowNull: false
@@ -14,5 +14,5 @@ module.exports = function(sequelize, DataTypes) {
     }
   });
 
-  return TemperatureEntry;
+  return TemperatureRecord;
 };

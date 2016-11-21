@@ -4,7 +4,7 @@ module.exports = function(sequelize, DataTypes) {
   }, {
     classMethods: {
       associate: function(models) {
-        Sensor.hasMany(models.TemperatureEntry)
+        Sensor.hasMany(models.TemperatureRecord)
       }
     }
   });
