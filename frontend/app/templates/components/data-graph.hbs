@@ -1,2 +1,9 @@
-<h2>Graph</h2>
-{{ time-series-chart lineData=timeSeriesLineContent }}
+{{ time-series-chart
+   lineData=dataWindow
+   timeDelta='day'
+   selectedInterval='D'
+   hasYAxisTitle='true' }}
+
+<label>Window Size</label>
+{{input value=windowSize}}
+{{dataWindow.length}}
