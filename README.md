@@ -9,3 +9,12 @@ The server is also running JohnnyFive, which talks with an Arduino using sensors
 ## Setup
 
 1. Assure you have NodeJS and NPM installed
+1. cd into the server directory and run
+```
+npm install
+```
+1. Install Postgres on your machine, and create the database `gardening_app` and the user `root`. Start the Postgres database server.
+1. Start the Gardening Application
+```
+node main
+```
