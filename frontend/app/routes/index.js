@@ -2,6 +2,6 @@ import Ember from 'ember';
 
 export default Ember.Route.extend({
   model() {
-    this.store.findAll('temperature-record');
+    return this.store.findAll('temperature-record');
   }
 });
