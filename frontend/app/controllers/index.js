@@ -6,13 +6,9 @@ export default Ember.Controller.extend({
     let data = this.get('temperatureData');
     if(!data) { return []; }
 
-    return data.map((rec) => {
-      console.log("hit");
-      return Ember.Object.create({
-        value: rec.get('temperature'),
-        time: new Date(rec.get('createdAt')),
-        label: 'Temperature'
-      });
+    return data.map((record) => {
+      return [Date.parse(record.get('createdAt')), record.get('temperature')];
     });
+
   }),
 });

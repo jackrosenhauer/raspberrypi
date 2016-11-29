@@ -1,9 +1,1 @@
-{{ time-series-chart
-   lineData=data
-   timeDelta='day'
-   selectedInterval='D'
-   hasYAxisTitle='true' }}
-
-<label>Window Size</label>
-{{input value=windowSize}}
-{{dataWindow.length}}
+{{high-charts chartOptions=chartOptions content=theData}}
