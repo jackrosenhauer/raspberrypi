@@ -1,6 +1,7 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
+  classNames: ['data-graph'],
   data: [],
   highchart: [],
   title: 'Line Graph',
@@ -21,7 +22,7 @@ export default Ember.Component.extend({
         zoomType: 'x'
       },
       title: {
-        text: this.get('title')
+        text: null
       },
       xAxis: {
         type: 'datetime',
