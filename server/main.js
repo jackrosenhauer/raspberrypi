@@ -47,6 +47,7 @@ router.use(function(req, res, next) {
 
 
 var TemperatureRecord = models.TemperatureRecord;
+var HumidityRecord = models.HumidityRecord;
 
 function getAttributesForModel(model) {
   return Object.keys(model.rawAttributes).filter(function(key) { return key !== 'id'});
@@ -70,6 +71,27 @@ router.route('/temperature-records')
     TemperatureRecord.create({temperature: req.body.temperature})
       .then(function(){
         res.json({ message: 'temperature-record created successfully.'});
+      });
+  });
+
+
+  router.route('/humidity-records')
+
+  .get(function(req, res) {
+    HumidityRecord.findAll().then(function(humRecords) {
+
+      var serializeOptions = {
+        attributes: getAttributesForModel(HumidityRecord)
+      };
+
+      res.json(new JSONAPISerializer('humidity-records', serializeOptions).serialize(humRecords));
+    });
+  })
+
+  .post(function(req, res) {
+    HumidityRecord.create({humidity: req.body.humidity})
+      .then(function(){
+        res.json({ message: 'humidity-record created successfully.'});
       });
   });
 
