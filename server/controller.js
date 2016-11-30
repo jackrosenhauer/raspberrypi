@@ -35,10 +35,10 @@ Controller.prototype.setupBoard = function(){
         }
     });
 
-    self.relays = new five.Relays([3, 2, 4, 5, 6, 7, 8, 9, 10]);
+    self.relays = new five.Relays([3, 2, 4, 5, 6, 7, 8, 9]);
 
     self.relays.forEach(function(relay, index){
-        relay.id = "relay" + index + 1;
+        relay.id = "relay" + (index + 1);
         relay.close();
     });
 
