@@ -1,71 +1,90 @@
-var five = require("johnny-five");
-var board = new five.Board({
-    //samplingInterval: 1000
-});
+const five = require("johnny-five");
+const util = require('util');
+const events = require('events');
 
-board.on("ready", function () {
-    //DS18B20 (requires ConfigurableFirmata)
-    // setTimeout(function(){
-    //
-    // }, 2000);
-    // var thermometer = new five.Thermometer({
-    //     controller: "DS18B20",
-    //     pin: 4
-    // });
-    //
-    // thermometer.on("change", function () {
-    //     console.log("thermometer1 change : " + this.F + "°F");
-    //     // console.log("0x" + this.address.toString(16));
-    // });
-    //
-    // thermometer.on("data", function () {
-    //     data = {
-    //         F: this.F,
-    //         C: this.C,
-    //         K: this.K
-    //     };
-    //     //console.log(data);
-    // });
-    //
+let Controller = function(options){
+    let self = this;
+    options = options || {};
 
-    //issue running both sensors at the same time.... https://github.com/rwaldron/johnny-five/issues/1115
-    var hygrometer = new five.Multi({
-       controller: "HTU21D",
-       freq: 20000
+    self.board = new five.Board(options);
+
+    self.status = {
+        relays: {},
+        hygrometer: {}
+    };
+
+    self.board.on('ready', self.setupBoard.bind(self));
+
+};
+
+util.inherits(Controller, events.EventEmitter);
+
+Controller.prototype.setupBoard = function(){
+    let self = this;
+
+    self.hygrometer = new five.Multi({
+        controller: "HTU21D",
+        freq: 1000,
+        id: "hygrometer"
     });
 
-
-    hygrometer.on("data", function(){
-        // console.log("HTU21D Thermometer");
-        // console.log("\tfahrenheit        : ", this.thermometer.fahrenheit);
-        // console.log("HTU21D Hygrometer");
-        // console.log("\trelative humidity : ", this.hygrometer.relativeHumidity);
+    self.hygrometer.on('data', function(){
+        self.status[this.id] = {
+            "temperature": this.thermometer.fahrenheit,
+            "humidity": this.hygrometer.relativeHumidity
+        }
     });
 
-    var data;
+    self.relays = new five.Relays([3, 2, 4, 5, 6, 7, 8, 9, 10]);
 
-    //messed up the order in the wiring so they're out of sequence...
-    var relays = new five.Relays([3, 2, 4, 5, 6, 7, 8, 9, 10]);
-    relays.close();
-
-    this.repl.inject({
-      status: function(){
-        return relays;
-      },
-      on: function(index){
-        //close the relay
-        relays[index].open();
-      },
-      off: function(index){
-        //open the relay
-        relays[index].close();
-      },
-      quit: function(){
-        process.exit();
-      }
+    self.relays.forEach(function(relay, index){
+        relay.id = "relay" + index + 1;
+        relay.close();
     });
 
-    board.samplingInterval(1000);
-    var time = new Date();
-    console.log("started at " + time + "\n");
-});
+    self.emit("ready");
+};
+
+Controller.prototype.getRelayStatus = function(relayID){
+    let self = this;
+
+    let relay = self.relays.byId(relayID);
+    if (relay){
+        return {"on": relay.isOn}
+    } else {
+        self.emit("error", new Error(`Relay with ID ${relayID} does not exist`));
+    }
+};
+
+Controller.prototype.update = function(){
+    let self = this;
+    //console.log(self);
+    self.relays.forEach(function(relay, index){
+       self.status.relays[relay.id] = self.getRelayStatus(relay.id);
+    });
+
+    self.emit("update", self.status);
+};
+
+Controller.prototype.getData = function(){
+    let self = this;
+};
+
+Controller.prototype.toggleRelay = function(relayID){
+    let self = this;
+    let relay;
+    if (relay = self.relays.byId(relayID)){
+        relay.toggle();
+    }else{
+        self.emit("error", new Error(`Relay with ID ${relayID} does not exist`));
+    }
+};
+
+Controller.prototype.setUpdateInterval = function(interval){
+    let self = this;
+    self.updateInterval = interval;
+    clearInterval(self.updateIntervalTimeout);
+    self.updateIntervalTimeout = setInterval(self.update.bind(self), interval);
+};
+
+module.exports = Controller;

@@ -2,6 +2,23 @@ var express = require("express");
 var session = require("express-session");
 var bodyParser = require('body-parser');
 
+
+var Controller = require("./controller.js");
+
+controller = new Controller({
+    repl: false,
+    debug: false,
+    id: "GrowPI"
+});
+
+controller.on("ready", function(){
+    controller.setUpdateInterval(5000);
+});
+
+controller.on("update", function(status){
+    console.log(status);
+});
+
 var JSONAPISerializer = require('jsonapi-serializer').Serializer;
 
 var api = express();
@@ -65,4 +82,3 @@ models.sequelize.sync().then(function() {
     console.log('Express server listening on port ' + port);
   });
 });
-
