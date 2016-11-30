@@ -1,10 +1,14 @@
-module.exports = function(sequelize, DataTypes) {
-  var Sensor = sequelize.define("Sensor", {
-    username: DataTypes.STRING
+module.exports = function (sequelize, DataTypes) {
+  let Sensor = sequelize.define("Sensor", {
+    name: {
+      type: DataTypes.STRING,
+      primaryKey: true
+    }
   }, {
     classMethods: {
-      associate: function(models) {
-        Sensor.hasMany(models.TemperatureRecord)
+      associate: function (models) {
+        Sensor.hasMany(models.TemperatureRecord);
+        Sensor.hasMany(models.HumidityRecord);
       }
     }
   });
