@@ -1,9 +1,8 @@
 var express = require("express");
 var session = require("express-session");
 var bodyParser = require('body-parser');
-
-
-var Controller = require("./controller.js");
+let Controller = require("./controller.js");
+let config = require('./config');
 
 controller = new Controller({
     repl: false,
@@ -20,7 +19,6 @@ controller.on("update", function(status){
 });
 
 var JSONAPISerializer = require('jsonapi-serializer').Serializer;
-
 var api = express();
 
 // configure app to use bodyParser()
@@ -32,6 +30,7 @@ var port = process.env.PORT || 7710;
 var router = express.Router();
 
 var models = require('./models');
+
 
 router.use(function(req, res, next) {
 
