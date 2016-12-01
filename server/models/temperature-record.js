@@ -1,6 +1,9 @@
 module.exports = function (sequelize, DataTypes) {
   var TemperatureRecord = sequelize.define("TemperatureRecord", {
-    temperature: DataTypes.FLOAT
+    temperature: {
+      type: DataTypes.FLOAT,
+      allowNull: false
+    }
   }, {
     classMethods: {
       associate: function (models) {

@@ -1,6 +1,9 @@
 module.exports = function (sequelize, DataTypes) {
   let HumidityRecord = sequelize.define("HumidityRecord", {
-    humidity: DataTypes.FLOAT
+    humidity: {
+      type: DataTypes.FLOAT,
+      allowNull: false
+    }
   }, {
     classMethods: {
       associate: function (models) {
