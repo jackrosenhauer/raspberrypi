@@ -118,14 +118,21 @@ router.route('/relays')
       });
   })
 
-router.route('/relays/:id')
 
-  .patch(function(req, res){
-    console.log(req);
-    // var rel = req.body.Relay;
-    // rel.isOn = !(rel.isOn)
-    // res.json({ message: 'relay status changed.'});
-  });
+//Toggle relay on/off
+//Not working yet
+
+// router.route('/relays/:id')
+
+//   .patch(function(req, res){
+//     console.log(req.body);
+//     var name = req.body.name;
+//     var relay = Relay.filter(function(find){
+//       return relay.name.equals(name);
+//     });
+//     relay.replace({isOn: !isOn});
+//     res.json({ message: 'relay status changed.'});
+//   })
 
 
 // all of our routes will be prefixed with /api/v1
