@@ -10,6 +10,7 @@ export default Ember.Component.extend({
 
   theData: Ember.computed('highchart', function(){
     return [{
+      showInLegend: false,
       name: this.get('title'),
       data: this.get('highchart')
     }];
