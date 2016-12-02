@@ -5,10 +5,12 @@
       <div class="panel-heading">
         <h3 class="panel-title">Temperature</h3>
       </div>
+
       {{ data-graph
          highchart=tempDataForGraph
          title="Temperature"
          yAxis="Temperature (F)"}}
+
     </div>
   </div>
 
@@ -17,11 +19,20 @@
       <div class="panel-heading">
         <h3 class="panel-title">Humidity</h3>
       </div>
+
       {{ data-graph
          highchart=humidityDataForGraph
          title="Humidity"
          yAxis="Humidity (%)"}}
+
     </div>
+  </div>
+
+  <div class="col-md-6">
+
+    {{ relay-list
+       relays=relays }}
+
   </div>
 
 </div>

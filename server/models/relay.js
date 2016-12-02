@@ -2,7 +2,7 @@ module.exports = function (sequelize, DataTypes) {
   let Relay = sequelize.define("Relay", {
     name: {
       type: DataTypes.STRING,
-      primaryKey: true
+      allowNull: false
     },
     isOn: {
       type: DataTypes.BOOLEAN,

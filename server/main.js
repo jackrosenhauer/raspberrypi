@@ -115,7 +115,7 @@ router.route('/relays')
       .then(function(){
         res.json({ message: 'relay created successfully.'});
       });
-  });
+  })
 
 
 // all of our routes will be prefixed with /api/v1

@@ -1,0 +1,10 @@
+<p style="margin-bottom: 0;" {{action 'toggleIsOn'}}>
+  {{relay.name}}
+  <span class="pull-right">
+    {{#if relay.isOn}}
+      <span class="label label-success">On</span>
+    {{else}}
+      <span class="label label-danger">Off</span>
+    {{/if}}
+  </span>
+</p>
