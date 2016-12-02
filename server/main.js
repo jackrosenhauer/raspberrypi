@@ -74,7 +74,10 @@ router.route('/temperature-records')
   });
 
 
-  router.route('/humidity-records')
+// router.route('/all-records')
+
+
+router.route('/humidity-records')
 
   .get(function(req, res) {
     HumidityRecord.findAll().then(function(humRecords) {

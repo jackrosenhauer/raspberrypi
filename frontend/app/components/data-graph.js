@@ -10,7 +10,6 @@ export default Ember.Component.extend({
 
   theData: Ember.computed('highchart', function(){
     return [{
-      name: "Temperature",
       data: this.get('highchart')
     }];
   }),
