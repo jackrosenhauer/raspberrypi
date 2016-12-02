@@ -10,6 +10,7 @@ export default Ember.Component.extend({
 
   theData: Ember.computed('highchart', function(){
     return [{
+      name: this.get('title'),
       data: this.get('highchart')
     }];
   }),
@@ -22,6 +23,9 @@ export default Ember.Component.extend({
       },
       title: {
         text: null
+      },
+      legend: {
+        enabled: false
       },
       xAxis: {
         type: 'datetime',
