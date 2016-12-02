@@ -1,6 +1,7 @@
 var express = require("express");
 var session = require("express-session");
 var bodyParser = require('body-parser');
+var patch = require('node-patch');
 let Controller = require("./controller.js");
 let config = require('./config');
 
@@ -116,6 +117,15 @@ router.route('/relays')
         res.json({ message: 'relay created successfully.'});
       });
   })
+
+router.route('/relays/:id')
+
+  .patch(function(req, res){
+    console.log(req);
+    // var rel = req.body.Relay;
+    // rel.isOn = !(rel.isOn)
+    // res.json({ message: 'relay status changed.'});
+  });
 
 
 // all of our routes will be prefixed with /api/v1
