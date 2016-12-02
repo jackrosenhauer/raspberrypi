@@ -47,6 +47,7 @@ router.use(function(req, res, next) {
 
 var TemperatureRecord = models.TemperatureRecord;
 var HumidityRecord = models.HumidityRecord;
+var Relay = models.Relay;
 
 function getAttributesForModel(model) {
   return Object.keys(model.rawAttributes).filter(function(key) { return key !== 'id'});
@@ -74,9 +75,6 @@ router.route('/temperature-records')
   });
 
 
-// router.route('/all-records')
-
-
 router.route('/humidity-records')
 
   .get(function(req, res) {
@@ -94,6 +92,28 @@ router.route('/humidity-records')
     HumidityRecord.create({humidity: req.body.humidity})
       .then(function(){
         res.json({ message: 'humidity-record created successfully.'});
+      });
+  });
+
+
+router.route('/relays')
+
+  .get(function(req, res) {
+    Relay.findAll().then(function(relays) {
+
+      var serializeOptions = {
+        attributes: getAttributesForModel(Relay)
+      };
+
+      res.json(new JSONAPISerializer('relays', serializeOptions).serialize(relays));
+
+    });
+  })
+
+  .post(function(req, res) {
+    Relay.create({name: req.body.name, isOn: false})
+      .then(function(){
+        res.json({ message: 'relay created successfully.'});
       });
   });
 
