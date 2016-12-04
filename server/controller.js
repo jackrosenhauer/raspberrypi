@@ -1,6 +1,8 @@
 const five = require("johnny-five");
 const util = require('util');
 const events = require('events');
+let RelayScheduler = require("./RelayScheduler");
+let relaySchedule = require("./RelaySchedule.json");
 
 let Controller = function (options) {
   let self = this;
@@ -8,48 +10,72 @@ let Controller = function (options) {
 
   self.board = new five.Board(options);
 
-  self.status = {
-    relays: {},
-    hygrometer: {}
-  };
-
+  self.updates = {};
   self.board.on('ready', self.setupBoard.bind(self));
 };
 
 util.inherits(Controller, events.EventEmitter);
 
+Controller.prototype.hygrometerUpdate = function(hygrometer){
+  let self = this;
+  self.updates[hygrometer.id] = {
+    "type": "sensor",
+    "temperature": hygrometer.thermometer.fahrenheit,
+    "humidity": hygrometer.hygrometer.relativeHumidity
+  };
+};
+
+
+
 Controller.prototype.setupBoard = function () {
   let self = this;
-
   self.hygrometer = new five.Multi({
     controller: "HTU21D",
     freq: 1000,
-    id: "hygrometer"
+    id: "Hygrometer"
   });
-
-  self.hygrometer.on('data', function () {
-    self.status[this.id] = {
-      "temperature": this.thermometer.fahrenheit,
-      "humidity": this.hygrometer.relativeHumidity
-    }
-  });
+  self.hygrometer.on('data', self.hygrometerUpdate.bind(self));
 
   self.relays = new five.Relays([3, 2, 4, 5, 6, 7, 8, 9]);
-
   self.relays.forEach(function (relay, index) {
     relay.id = "relay" + (index + 1);
     relay.close();
+    if (relaySchedule[relay.id]){
+      relay.scheduler = new RelayScheduler(relay, relaySchedule[relay.id].schedule, self.turnRelayOn.bind(self), self.turnRelayOff.bind(self));
+    }
   });
 
+  self.emitAllRelaysStatus();
   self.emit("ready");
 };
 
-Controller.prototype.getRelayStatus = function (relayID) {
+Controller.prototype.emitAllRelaysStatus = function (relayID) {
   let self = this;
+  let relayStatus = {};
 
-  let relay = self.relays.byId(relayID);
-  if (relay) {
-    return {"on": relay.isOn}
+  //we're using NO on the relay, so we take the inverse of isOn
+  self.relays.forEach(function (relay, index) {
+    relayStatus[relay.id] = {
+      'type': "relay",
+      "isOn": !relay.isOn
+    };
+  });
+  self.emit("update", relayStatus);
+};
+
+Controller.prototype.emitRelayStatus = function(relayID){
+  let self = this;
+  let relay;
+  if (relay = self.relays.byId(relayID)){
+
+  };
+};
+
+Controller.prototype.getRelayById = function(relayID){
+  let self = this;
+  let relay;
+  if (relay = self.relays.byId(relayID)){
+    return relay;
   } else {
     self.emit("error", new Error(`Relay with ID ${relayID} does not exist`));
   }
@@ -57,16 +83,8 @@ Controller.prototype.getRelayStatus = function (relayID) {
 
 Controller.prototype.update = function () {
   let self = this;
-  //console.log(self);
-  self.relays.forEach(function (relay, index) {
-    self.status.relays[relay.id] = self.getRelayStatus(relay.id);
-  });
-
-  self.emit("update", self.status);
-};
-
-Controller.prototype.getData = function () {
-  let self = this;
+  self.emit("update", self.updates);
+  self.updates = {};
 };
 
 Controller.prototype.toggleRelay = function (relayID) {
@@ -74,6 +92,38 @@ Controller.prototype.toggleRelay = function (relayID) {
   let relay;
   if (relay = self.relays.byId(relayID)) {
     relay.toggle();
+    self.emit("update", {relayID: {"type": "relay", "isOn": !relay.IsOn}});
+  } else {
+    self.emit("error", new Error(`Relay with ID ${relayID} does not exist`));
+  }
+};
+
+Controller.prototype.turnRelayOn = function(relayID){
+  let self = this;
+  console.log('turning relay on...');
+  let relay;
+  if (relay = self.relays.byId(relayID)){
+    relay.open();
+    self.emit("update", {relayID: {"type": "relay", "isOn": !relay.IsOn}});
+  } else {
+    self.emit("error", new Error(`Relay with ID ${relayID} does not exist`));
+  }
+
+};
+
+Controller.prototype.turnRelayOff = function(relayID){
+  let self = this;
+  console.log('turning relay off...');
+  let relay;
+  if (relay = self.relays.byId(relayID)){
+    relay.close();
+    let updat= {};
+    update[relayID] = {
+      "type": "relay",
+      "isOn": !relay.isOn()
+    };
+
+    self.emit("update", update);
   } else {
     self.emit("error", new Error(`Relay with ID ${relayID} does not exist`));
   }
