@@ -1,9 +1,11 @@
 var express = require("express");
 var session = require("express-session");
 var bodyParser = require('body-parser');
-var patch = require('node-patch');
+// var patch = require('node-patch');
 let Controller = require("./controller.js");
 let config = require('./config');
+
+let cors = require('cors');
 
 controller = new Controller({
     repl: false,
@@ -32,13 +34,11 @@ var router = express.Router();
 
 var models = require('./models');
 
+api.use(cors());
 
 router.use(function(req, res, next) {
-
-  // Allow Cross-Origin Requests
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-
 
   // do logging
   console.log('Check for auth here?');
@@ -55,20 +55,17 @@ function getAttributesForModel(model) {
 }
 
 
-router.route('/temperature-records')
+router.route('/temperatureRecords')
 
   .get(function(req, res) {
+    console.log("Get request for temp records");
     TemperatureRecord.findAll().then(function(tempRecords) {
-
-      var serializeOptions = {
-        attributes: getAttributesForModel(TemperatureRecord)
-      };
-
-      res.json(new JSONAPISerializer('temperature-records', serializeOptions).serialize(tempRecords));
+      res.json({'temperature-records': tempRecords});
     });
   })
 
   .post(function(req, res) {
+    console.log("Get request for humidity records");
     TemperatureRecord.create({temperature: req.body.temperature})
       .then(function(){
         res.json({ message: 'temperature-record created successfully.'});
@@ -76,16 +73,11 @@ router.route('/temperature-records')
   });
 
 
-router.route('/humidity-records')
+router.route('/humidityRecords')
 
   .get(function(req, res) {
     HumidityRecord.findAll().then(function(humRecords) {
-
-      var serializeOptions = {
-        attributes: getAttributesForModel(HumidityRecord)
-      };
-
-      res.json(new JSONAPISerializer('humidity-records', serializeOptions).serialize(humRecords));
+      res.json({'humidity-records': humRecords});
     });
   })
 
@@ -100,14 +92,9 @@ router.route('/humidity-records')
 router.route('/relays')
 
   .get(function(req, res) {
+    console.log("Get request for relays");
     Relay.findAll().then(function(relays) {
-
-      var serializeOptions = {
-        attributes: getAttributesForModel(Relay)
-      };
-
-      res.json(new JSONAPISerializer('relays', serializeOptions).serialize(relays));
-
+      res.json({'relays': relays});
     });
   })
 
@@ -122,17 +109,20 @@ router.route('/relays')
 //Toggle relay on/off
 //Not working yet
 
-// router.route('/relays/:id')
+router.route('/relays/:id')
 
-//   .patch(function(req, res){
-//     console.log(req.body);
-//     var name = req.body.name;
-//     var relay = Relay.filter(function(find){
-//       return relay.name.equals(name);
-//     });
-//     relay.replace({isOn: !isOn});
-//     res.json({ message: 'relay status changed.'});
-//   })
+  .put(function(req, res, next){
+    var id = req.params.id;
+    var isOn = req.body.relay.isOn;
+    console.log(id, isOn);
+
+
+    Relay.find({ where: { id: id}}).then(function(record){
+      record.update({isOn: isOn}).then(function(updatedRecord){
+        res.json({ 'relay': updatedRecord});
+      });
+    })
+  })
 
 
 // all of our routes will be prefixed with /api/v1
