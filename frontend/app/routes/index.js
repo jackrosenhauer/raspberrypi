@@ -2,6 +2,10 @@ import Ember from 'ember';
 
 export default Ember.Route.extend({
   model() {
-    return this.store.findAll('temperature-record');
+    return Ember.RSVP.hash({
+      temperatureRecords: this.store.findAll('temperature-record'),
+      humidityRecords: this.store.findAll('humidity-record'),
+      relays: this.store.findAll('relay')
+    });
   }
 });

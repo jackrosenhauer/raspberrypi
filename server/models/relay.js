@@ -1,8 +1,8 @@
 module.exports = function (sequelize, DataTypes) {
-  let Relays = sequelize.define("Relays", {
+  let Relay = sequelize.define("Relay", {
     name: {
       type: DataTypes.STRING,
-      primaryKey: true
+      allowNull: false
     },
     isOn: {
       type: DataTypes.BOOLEAN,
@@ -10,5 +10,5 @@ module.exports = function (sequelize, DataTypes) {
     }
   });
 
-  return Relays;
+  return Relay;
 };
