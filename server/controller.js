@@ -2,14 +2,15 @@ const five = require("johnny-five");
 const util = require('util');
 const events = require('events');
 let RelayScheduler = require("./RelayScheduler");
-let relaySchedule = require("./RelaySchedule.json");
+//let relaySchedule = require("./RelaySchedule.json");
 
-let Controller = function (options) {
+let Controller = function (options, config) {
   let self = this;
   options = options || {};
 
   self.board = new five.Board(options);
 
+  self.config = config;
   self.updates = {};
   self.board.on('ready', self.setupBoard.bind(self));
 };
@@ -38,8 +39,8 @@ Controller.prototype.setupBoard = function () {
   self.relays.forEach(function (relay, index) {
     relay.id = "relay" + (index + 1);
     relay.close();
-    if (relaySchedule[relay.id]){
-      relay.scheduler = new RelayScheduler(relay, relaySchedule[relay.id].schedule, self.turnRelayOn.bind(self), self.turnRelayOff.bind(self));
+    if (typeof self.config[relay.id] !== "undefined" && self.config[relay.id].schedule){
+      relay.scheduler = new RelayScheduler(relay, self.config[relay.id].schedule, self.turnRelayOn.bind(self), self.turnRelayOff.bind(self));
     }
   });
 

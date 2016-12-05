@@ -1,7 +1,6 @@
 /**
  * Created by Jack on 12/3/2016.
  */
-var config = require("./RelaySchedule.json");
 var events = require("events");
 
 const SECOND_MS = 1000;
