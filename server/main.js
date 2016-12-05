@@ -43,6 +43,9 @@ controller.on("update", function (status) {
         console.log(update);
         break;
       case "relay":
+        let relayID = update;
+        let isOn = status[update].isOn;
+        updateRelayRecord(relayID, isOn);
         console.log("relay???");
         console.log(update);
         break;
@@ -91,6 +94,12 @@ function addHumidityRecord(record) {
       return {status: 'error', message: error.message};
     })
 }
+
+function updateRelayRecord(relayID, isOn){
+  Relay.find({where: {id: relayID}}).then(function(record){
+    record.update({isOn: isOn});
+  });
+};
 
 router.route('/temperatureRecords')
   .get(function (req, res) {
@@ -151,12 +160,20 @@ router.route('/relays/:id')
     var isOn = req.body.relay.isOn;
     console.log(id, isOn);
 
-
-    Relay.find({where: {id: id}}).then(function (record) {
-      record.update({isOn: isOn}).then(function (updatedRecord) {
-        res.json({'relay': updatedRecord});
+    try{
+      controller.changeRelayState(id, isOn, function(){
+        Relay.find({where: {id: id}}).then(function (record) {
+          record.isOn = isOn;
+          res.json({'relay': record});
+        });
       });
-    });
+    } catch (err) {
+      if (err.message === "Something went wrong"){
+
+      } else {
+        throw err;
+      }
+    }
   });
 
 

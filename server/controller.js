@@ -87,6 +87,8 @@ Controller.prototype.update = function () {
   self.updates = {};
 };
 
+
+//create sync records
 Controller.prototype.toggleRelay = function (relayID) {
   let self = this;
   let relay;
@@ -108,7 +110,6 @@ Controller.prototype.turnRelayOn = function(relayID){
   } else {
     self.emit("error", new Error(`Relay with ID ${relayID} does not exist`));
   }
-
 };
 
 Controller.prototype.turnRelayOff = function(relayID){
@@ -117,7 +118,7 @@ Controller.prototype.turnRelayOff = function(relayID){
   let relay;
   if (relay = self.relays.byId(relayID)){
     relay.close();
-    let updat= {};
+    let update = {};
     update[relayID] = {
       "type": "relay",
       "isOn": !relay.isOn()
@@ -134,6 +135,19 @@ Controller.prototype.setUpdateInterval = function (interval) {
   self.updateInterval = interval;
   clearInterval(self.updateIntervalTimeout);
   self.updateIntervalTimeout = setInterval(self.update.bind(self), interval);
+};
+
+Controller.changeRelayState = function(relayID, isOn, cb){
+  let self = this;
+  if (isOn === true){
+    self.turnRelayOn(relayID);
+  } else if (isOn === false){
+    self.turnRelayOff(relayID);
+  } else {
+    throw new Error("Something went wrong");
+  }
+  //do some stuff
+  cb();
 };
 
 module.exports = Controller;
