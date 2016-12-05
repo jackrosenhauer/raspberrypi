@@ -4,6 +4,7 @@
 var config = require("./RelaySchedule.json");
 var events = require("events");
 
+const SECOND_MS = 1000;
 const MINUTE_MS = 60 * 1000;
 const HOUR_MS = MINUTE_MS * 60;
 const DAY_MS = HOUR_MS * 24;
@@ -21,11 +22,12 @@ function RelayScheduler(relay, schedule, onFunction, offFunction) {
   self.nextTask = null;
   self.nexTaskIndex = null;
 
+  self.nextAction = null;
+
   self.parseSchedule(schedule);
   self.setupTasks();
   self.scheduleNextAction();
 }
-
 
 //ensures the schedule is in desc order
 RelayScheduler.prototype.parseSchedule = function (schedule) {
@@ -33,6 +35,9 @@ RelayScheduler.prototype.parseSchedule = function (schedule) {
   let previousStartTime = undefined;
   let previousEndTime = undefined;
 
+  if (schedule.length === 0){
+    throw new Error("No schedule given");
+  }
   schedule.forEach(function (period) {
     let startTimeMS = self.timeToMS(period["on"]);
     let endTimeMS = self.timeToMS(period["off"]);
@@ -64,28 +69,39 @@ RelayScheduler.prototype.parseSchedule = function (schedule) {
 RelayScheduler.prototype.setupTasks = function () {
   let self = this;
   let currentTimeInMS = self.getCurrentTimeInMS();
+
   let nextTask = undefined;
   let previousEndTime = undefined;
 
   for (let i = 0, len = self.schedule.length; i < len; i++){
     let period = self.schedule[i];
+
     if (currentTimeInMS >= period.on && currentTimeInMS <= period.off) {
       //the current task should be this
-      nextTask = period;
       self.currentTaskIndex = i;
       self.currentTask = self.schedule[i];
-      self.nextTask = self.schedule[i + 1 % self.schedule.length];
+
+      let nextTaskIndex = (i + 1) % self.schedule.length;
+      self.nextTask = self.schedule[nextTaskIndex];
+      self.nextTaskindex = nextTaskIndex;
+
       self.triggerOnAction();
       console.log("!!");
+      //return from function, everything is setup
+      nextTask = period;
+      break;
     } else if (currentTimeInMS > previousEndTime && currentTimeInMS < period.on) {
       //this is the NEXT task
       self.currentTaskIndex = null;
       self.currentTask = null;
+
       self.nextTask = self.schedule[i];
       self.nextTaskindex = i;
+
       self.triggerOffAction();
-      nextTask = period;
       console.log("..");
+      nextTask = period;
+      break;
     } else {
       previousEndTime = period.off;
       console.log("none of the above");
@@ -99,37 +115,45 @@ RelayScheduler.prototype.setupTasks = function () {
     self.nextTask = self.schedule[0];
     self.nexttaskIndex = 0;
   }
-
 };
 
 RelayScheduler.prototype.scheduleNextAction = function(){
   let self = this;
   if (self.currentTask !== null){
     //schedule the off action
-    let timeUntilAction = self.getTimeDifferenceInMS(self.currentTask['on'], self.getCurrentTimeInMS());
-    console.log("ms until next action: " + timeUntilAction);
+    let timeUntilAction = self.getTimeDifferenceInMS(self.currentTask['off'], self.getCurrentTimeInMS());
+    console.log("ms until next action (off): " + self.prettyDateOfNextAction(timeUntilAction));
+
   } else if (self.nextTask !== null){
     //schedule the on action
     console.log(self.nextTask['on']);
     console.log(self.getCurrentTimeInMS());
     let timeUntilAction = self.getTimeDifferenceInMS(self.nextTask['on'], self.getCurrentTimeInMS());
-    console.log("ms until next action: " + timeUntilAction);
+    console.log("ms until next action (on): " + self.prettyDateOfNextAction(timeUntilAction));
   } else {
+    //the world implodes
 
   }
 };
 
-RelayScheduler.prototype.getCurrentTimeInMS = function(){
-  let currentTime = new Date();
-  return currentTime.getHours() * HOUR_MS + currentTime.getMinutes() * MINUTE_MS;
+RelayScheduler.prototype.prettyDateOfNextAction = function(additionalMS){
+  var date = Date.now();
+  date += additionalMS;
+  date = new Date(date);
+  return date;
 };
 
-//converts the format hh:mm to milliseconds
+RelayScheduler.prototype.getCurrentTimeInMS = function(){
+  let currentTime = new Date();
+  return currentTime.getHours() * HOUR_MS + currentTime.getMinutes() * MINUTE_MS + currentTime.getSeconds() * SECOND_MS;
+};
+
+//converts the time format hh:mm:ss to milliseconds
 RelayScheduler.prototype.timeToMS = function (time) {
   let ms;
-  let timeArray = /(\d{1,2}):(\d{2})/.exec(time);
+  let timeArray = /(\d{1,2}):(\d{2}):(\d{2})/.exec(time);
   if (timeArray !== null) {
-    ms = timeArray[1] * HOUR_MS + timeArray[2] * MINUTE_MS;
+    ms = timeArray[1] * HOUR_MS + timeArray[2] * MINUTE_MS + timeArray[3] * MINUTE_MS;
   } else {
     //throw error
     throw Error("Invalid time: " + time);
@@ -158,7 +182,6 @@ RelayScheduler.prototype.triggerOffAction = function(){
   self.offFunction(self.relay.id);
   self.currntTask = null;
   self.currentTaskIndex = null;
-
 };
 
 module.exports = RelayScheduler;

@@ -3,10 +3,11 @@
     "type": "relay",
     "webName": "Lights",
     "schedule": [
-      {"on": "9:00", "off": "10:00"},
-      {"on": "11:00", "off": "12:59"},
-      {"on": "13:00", "off": "15:00"},
-      {"on": "16:00", "off": "23:59"}
+      {"on": "10:12:00", "off": "10:00:00"},
+      {"on": "11:00:00", "off": "12:59:00"}
     ]
   }
 }
+
+//check the order, ensure that the times are asc
+//ensure no two periods are intersecting
