@@ -7,6 +7,9 @@ module.exports = function (sequelize, DataTypes) {
     isOn: {
       type: DataTypes.BOOLEAN,
       allowNull: false
+    },
+    webName: {
+      type: DataTypes.STRING
     }
   });
 
