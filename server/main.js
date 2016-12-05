@@ -16,6 +16,29 @@ var Relay = models.Relay;
 
 let cors = require('cors');
 
+//Temp range and Humidity range
+var minTemp = 65;
+var maxTemp = 85;
+var minHumidity = 0.4;
+var maxHumidity = 0.7;
+
+//Nodemailer setup for email updates
+var nodemailer = require("nodemailer"); //npm install nodemailer@0.7.1
+var transporter = nodemailer.createTransport("SMTP", {
+        service: 'gmail',
+        auth: {
+            user: "", //Valid username and password for gmail account needed here
+            pass: ""
+        }
+    });
+var mailOptions = {
+    from: '"noreply" <noreply@gmail.com>', // sender address 
+    to: '', // receiver email needed here 
+    subject: 'Gardening Application Warning', // Subject line 
+    text: 'The Temperature/Humidity is outside of the specified range.', // plaintext body 
+    html: '<b>The temperature/humidity is outside of the specified range.</b>' // html body 
+};
+
 controller = new Controller({
   repl: false,
   debug: false,
@@ -34,10 +57,16 @@ controller.on("update", function (status) {
         let sensor = status[update];
         if (sensor['temperature']) {
           addTemperatureRecord({SensorName: update, 'temperature': sensor['temperature']});
+          //If temp is outside specified range, email
+          if(sensor['temperature']) < minTemp || sensor['temperature'] > maxTemp)
+            sendEmailNotification();
         }
 
         if (sensor['humidity']) {
           addHumidityRecord({SensorName: update, 'humidity': sensor['humidity']});
+          //If humidity is outside specified range, email
+          if(sensor['humidity']) < minHumidity || sensor['humidity'] > maxHumidity)
+            sendEmailNotification();
         }
 
         console.log(update);
@@ -93,6 +122,15 @@ function addHumidityRecord(record) {
     .catch(function (error) {
       return {status: 'error', message: error.message};
     })
+}
+
+function sendEmailNotification(){
+  transporter.sendMail(mailOptions, function(error, info){
+    if(error){
+        return console.log(error);
+    }
+    console.log('Message sent: ' + info.response);
+});
 }
 
 function updateRelayRecord(relayID, isOn){
