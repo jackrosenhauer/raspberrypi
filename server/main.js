@@ -1,7 +1,7 @@
 var express = require("express");
 var session = require("express-session");
 var bodyParser = require('body-parser');
-// var patch = require('node-patch');
+
 let Controller = require("./controller.js");
 let config = require('./RelaySchedule');
 var JSONAPISerializer = require('jsonapi-serializer').Serializer;
@@ -101,12 +101,41 @@ function updateRelayRecord(relayID, isOn){
   });
 };
 
+function generateFindOptions(startingDate) {
+  var findOptions;
+
+  if(!startingDate) {
+
+    findOptions = {
+      limit: 1,
+      order: [ [ 'createdAt', 'DESC' ]]
+    }
+
+  } else {
+
+    findOptions = {
+      where: {
+        createdAt: {
+          $gt: startingDate
+        }
+      }
+    };
+
+  }
+
+  return findOptions;
+}
+
 router.route('/temperatureRecords')
-  .get(function (req, res) {
-    console.log("Get request for temp records");
-    TemperatureRecord.findAll().then(function (tempRecords) {
+
+  .get(function(req, res) {
+    var startingDate = req.query.startingDate;
+    var findOptions = generateFindOptions(startingDate);
+
+    TemperatureRecord.findAll(findOptions).then(function(tempRecords) {
       res.json({'temperature-records': tempRecords});
     });
+
   })
 
   .post(function (req, res) {
@@ -119,8 +148,12 @@ router.route('/temperatureRecords')
 
 
 router.route('/humidityRecords')
-  .get(function (req, res) {
-    HumidityRecord.findAll().then(function (humRecords) {
+
+  .get(function(req, res) {
+    var startingDate = req.query.startingDate;
+    var findOptions = generateFindOptions(startingDate);
+
+    HumidityRecord.findAll(findOptions).then(function(humRecords) {
       res.json({'humidity-records': humRecords});
     });
   })
@@ -151,7 +184,6 @@ router.route('/relays')
 
 
 //Toggle relay on/off
-//Not working yet
 
 router.route('/relays/:id')
 
