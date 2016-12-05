@@ -123,6 +123,7 @@ RelayScheduler.prototype.scheduleNextAction = function(){
   if (self.currentTask){
     //schedule the off action
     timeUntilAction = self.getTimeDifferenceInMS(self.currentTask['off'], self.getCurrentTimeInMS());
+
     console.log("ms until next action: " + timeUntilAction);
 
   } else {
@@ -136,6 +137,7 @@ RelayScheduler.prototype.scheduleNextAction = function(){
   }
 
   self.nextAction = setTimeout(() => {
+
     self.setupTasks();
     self.scheduleNextAction();
   }, timeUntilAction);
