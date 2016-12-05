@@ -16,6 +16,12 @@ var Relay = models.Relay;
 
 let cors = require('cors');
 
+//Temp range and Humidity range
+var minTemp = 65;
+var maxTemp = 85;
+var minHumidity = 0.4;
+var maxHumidity = 0.7;
+
 //Nodemailer setup for email updates
 var nodemailer = require("nodemailer"); //npm install nodemailer@0.7.1
 var transporter = nodemailer.createTransport("SMTP", {
