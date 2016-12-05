@@ -35,7 +35,11 @@ Controller.prototype.setupBoard = function () {
   });
   self.hygrometer.on('data', self.hygrometerUpdate.bind(self));
 
-  self.relays = new five.Relays([3, 2, 4, 5, 6, 7, 8, 9]);
+  //self.relays = new five.Relays([3, 2, 4, 5, 6, 7, 8, 9]);
+  self.relays = new five.Relays({
+    "pins": [3, 2, 4, 5, 6, 7, 8, 9],
+    "type": "NO"
+  });
   self.relays.forEach(function (relay, index) {
     relay.id = "relay" + (index + 1);
     relay.close();
