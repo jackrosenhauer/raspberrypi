@@ -25,8 +25,6 @@ Controller.prototype.hygrometerUpdate = function(hygrometer){
   };
 };
 
-
-
 Controller.prototype.setupBoard = function () {
   let self = this;
   self.hygrometer = new five.Multi({
@@ -45,8 +43,11 @@ Controller.prototype.setupBoard = function () {
     }
   });
 
-  self.emitAllRelaysStatus();
-  self.emit("ready");
+  //let the scheduler run... sleep for .5 seconds
+  setTimeout(function(){
+    self.emitAllRelaysStatus();
+    self.emit("ready");
+  }, 500);
 };
 
 Controller.prototype.emitAllRelaysStatus = function (relayID) {
@@ -106,7 +107,13 @@ Controller.prototype.turnRelayOn = function(relayID){
   let relay;
   if (relay = self.relays.byId(relayID)){
     relay.open();
-    self.emit("update", {relayID: {"type": "relay", "isOn": !relay.IsOn}});
+    let update = {};
+    update[relayID] = {
+      "type": "relay",
+      "isOn": !relay.isOn
+    };
+
+    self.emit("update", update);
   } else {
     self.emit("error", new Error(`Relay with ID ${relayID} does not exist`));
   }
@@ -121,7 +128,7 @@ Controller.prototype.turnRelayOff = function(relayID){
     let update = {};
     update[relayID] = {
       "type": "relay",
-      "isOn": !relay.isOn()
+      "isOn": !relay.isOn
     };
 
     self.emit("update", update);
@@ -137,7 +144,7 @@ Controller.prototype.setUpdateInterval = function (interval) {
   self.updateIntervalTimeout = setInterval(self.update.bind(self), interval);
 };
 
-Controller.changeRelayState = function(relayID, isOn, cb){
+Controller.prototype.changeRelayState = function(relayID, isOn, cb){
   let self = this;
   if (isOn === true){
     self.turnRelayOn(relayID);
