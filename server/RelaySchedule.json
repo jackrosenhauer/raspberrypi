@@ -3,11 +3,12 @@
     "type": "relay",
     "webName": "Lights",
     "schedule": [
-      {"on": "10:12:00", "off": "10:00:00"},
-      {"on": "11:00:00", "off": "12:59:00"}
+      {"on": "01:07:00", "off": "01:07:05"},
+      {"on": "01:07:10", "off": "01:07:15"},
+      {"on": "01:07:20", "off": "01:07:25"},
+      {"on": "01:07:30", "off": "01:07:35"},
+      {"on": "01:07:40", "off": "01:07:45"},
+      {"on": "01:07:50", "off": "01:07:55"}
     ]
   }
 }
-
-//check the order, ensure that the times are asc
-//ensure no two periods are intersecting
