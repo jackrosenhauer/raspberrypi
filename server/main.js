@@ -96,10 +96,18 @@ function addHumidityRecord(record) {
 }
 
 function updateRelayRecord(relayID, isOn){
-  Relay.find({where: {id: relayID}}).then(function(record){
-    record.update({isOn: isOn});
-  });
-};
+  Relay.findOrCreate({where: {name: relayID}, defaults: {isOn: isOn}})
+    .spread(function(relay, created){
+      console.log(relay.get({
+        plain: true
+      }));
+      if (!created){
+        relay.update({isOn: isOn});
+      }
+
+      console.log(created);
+    })
+}
 
 router.route('/temperatureRecords')
   .get(function (req, res) {
