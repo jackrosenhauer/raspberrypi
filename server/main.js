@@ -1,77 +1,102 @@
-var express = require("express");
-var session = require("express-session");
-var bodyParser = require('body-parser');
+let express = require("express");
+let session = require("express-session");
+let bodyParser = require('body-parser');
 
 let Controller = require("./controller.js");
-let config = require('./RelaySchedule');
-var JSONAPISerializer = require('jsonapi-serializer').Serializer;
-var models = require('./models');
+let config = require('./config');
+let JSONAPISerializer = require('jsonapi-serializer').Serializer;
+let models = require('./models');
 
-var api = express();
-var port = process.env.PORT || 7710;
-var router = express.Router();
-var TemperatureRecord = models.TemperatureRecord;
-var HumidityRecord = models.HumidityRecord;
-var Relay = models.Relay;
+let api = express();
+let port = process.env.PORT || 7710;
+let router = express.Router();
+
+//db models
+let TemperatureRecord = models.TemperatureRecord;
+let HumidityRecord = models.HumidityRecord;
+let Relay = models.Relay;
 
 let cors = require('cors');
 
+// configure app to use bodyParser()
+// this will let us get the data from a POST
+api.use(bodyParser.urlencoded({extended: true}));
+api.use(bodyParser.json());
+// all of our routes will be prefixed with /api/v1
+api.use('/api/v1', router);
+
 //Temp range and Humidity range
-var minTemp = 65;
-var maxTemp = 85;
-var minHumidity = 0.4;
-var maxHumidity = 0.7;
+let minTemp = 65;
+let maxTemp = 85;
+let minHumidity = 0.4;
+let maxHumidity = 0.7;
 
 //Nodemailer setup for email updates
-var nodemailer = require("nodemailer"); //npm install nodemailer@0.7.1
-var transporter = nodemailer.createTransport("SMTP", {
-        service: 'gmail',
-        auth: {
-            user: "", //Valid username and password for gmail account needed here
-            pass: ""
-        }
-    });
-var mailOptions = {
-    from: '"noreply" <noreply@gmail.com>', // sender address 
-    to: '', // receiver email needed here 
-    subject: 'Gardening Application Warning', // Subject line 
-    text: 'The Temperature/Humidity is outside of the specified range.', // plaintext body 
-    html: '<b>The temperature/humidity is outside of the specified range.</b>' // html body 
+let nodemailer = require("nodemailer"); //npm install nodemailer@0.7.1
+let transporter = nodemailer.createTransport("SMTP", {
+  service: 'gmail',
+  auth: {
+    user: "", //Valid username and password for gmail account needed here
+    pass: ""
+  }
+});
+
+let mailOptions = {
+  from: '"noreply" <noreply@gmail.com>', // sender address
+  to: '', // receiver email needed here
+  subject: 'Gardening Application Warning', // Subject line
+  text: 'The Temperature/Humidity is outside of the specified range.', // plaintext body
+  html: '<b>The temperature/humidity is outside of the specified range.</b>' // html body
 };
 
 controller = new Controller({
   repl: false,
   debug: false,
   id: "GrowPI"
-});
+}, config["controller"]);
 
+//wait for the board to get setup, then start express
 controller.on("ready", function () {
   controller.setUpdateInterval(5000);
+  models.sequelize.sync().then(function () {
+    api.listen(port, function () {
+      console.log('Express server listening on port ' + port);
+    });
+  });
 });
 
 controller.on("update", function (status) {
-  console.log(status);
   Object.keys(status).forEach(function (update) {
     switch (status[update]['type']) {
       case "sensor":
         let sensor = status[update];
         if (sensor['temperature']) {
           addTemperatureRecord({SensorName: update, 'temperature': sensor['temperature']});
+
           //If temp is outside specified range, email
-          if(sensor['temperature']) < minTemp || sensor['temperature'] > maxTemp)
-            sendEmailNotification();
+          if (config["alerts"]["enabled"]){
+            if (sensor['temperature'] < minTemp || sensor['temperature'] > maxTemp) {
+              sendEmailNotification();
+            }
+          }
+
         }
 
         if (sensor['humidity']) {
           addHumidityRecord({SensorName: update, 'humidity': sensor['humidity']});
+
           //If humidity is outside specified range, email
-          if(sensor['humidity']) < minHumidity || sensor['humidity'] > maxHumidity)
-            sendEmailNotification();
+          if (config["alerts"]["enabled"]){
+            if (sensor['humidity'] < minHumidity || sensor['humidity'] > maxHumidity) {
+              sendEmailNotification();
+            }
+          }
         }
 
-        console.log(update);
         break;
       case "relay":
+        console.log(update);
+        console.log(status);
         let relayID = update;
         let isOn = status[update].isOn;
         updateRelayRecord(relayID, isOn);
@@ -82,12 +107,6 @@ controller.on("update", function (status) {
   });
   // console.log(status);
 });
-
-// configure app to use bodyParser()
-// this will let us get the data from a POST
-api.use(bodyParser.urlencoded({extended: true}));
-api.use(bodyParser.json());
-
 
 router.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -124,22 +143,22 @@ function addHumidityRecord(record) {
     })
 }
 
-function sendEmailNotification(){
-  transporter.sendMail(mailOptions, function(error, info){
-    if(error){
-        return console.log(error);
+function sendEmailNotification() {
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      return console.log(error);
     }
     console.log('Message sent: ' + info.response);
-});
+  });
 }
 
-function updateRelayRecord(relayID, isOn){
+function updateRelayRecord(relayID, isOn) {
   Relay.findOrCreate({where: {name: relayID}, defaults: {isOn: isOn}})
-    .spread(function(relay, created){
+    .spread(function (relay, created) {
       console.log(relay.get({
         plain: true
       }));
-      if (!created){
+      if (!created) {
         relay.update({isOn: isOn});
       }
 
@@ -148,13 +167,13 @@ function updateRelayRecord(relayID, isOn){
 }
 
 function generateFindOptions(startingDate) {
-  var findOptions;
+  let findOptions;
 
-  if(!startingDate) {
+  if (!startingDate) {
 
     findOptions = {
       limit: 1,
-      order: [ [ 'createdAt', 'DESC' ]]
+      order: [['createdAt', 'DESC']]
     }
 
   } else {
@@ -174,11 +193,11 @@ function generateFindOptions(startingDate) {
 
 router.route('/temperatureRecords')
 
-  .get(function(req, res) {
-    var startingDate = req.query.startingDate;
-    var findOptions = generateFindOptions(startingDate);
+  .get(function (req, res) {
+    let startingDate = req.query.startingDate;
+    let findOptions = generateFindOptions(startingDate);
 
-    TemperatureRecord.findAll(findOptions).then(function(tempRecords) {
+    TemperatureRecord.findAll(findOptions).then(function (tempRecords) {
       res.json({'temperature-records': tempRecords});
     });
 
@@ -195,11 +214,11 @@ router.route('/temperatureRecords')
 
 router.route('/humidityRecords')
 
-  .get(function(req, res) {
-    var startingDate = req.query.startingDate;
-    var findOptions = generateFindOptions(startingDate);
+  .get(function (req, res) {
+    let startingDate = req.query.startingDate;
+    let findOptions = generateFindOptions(startingDate);
 
-    HumidityRecord.findAll(findOptions).then(function(humRecords) {
+    HumidityRecord.findAll(findOptions).then(function (humRecords) {
       res.json({'humidity-records': humRecords});
     });
   })
@@ -234,19 +253,19 @@ router.route('/relays')
 router.route('/relays/:id')
 
   .put(function (req, res, next) {
-    var id = req.params.id;
-    var isOn = req.body.relay.isOn;
+    let id = req.params.id;
+    let isOn = req.body.relay.isOn;
     console.log(id, isOn);
 
-    try{
-      controller.changeRelayState(id, isOn, function(){
+    try {
+      controller.changeRelayState(id, isOn, function () {
         Relay.find({where: {id: id}}).then(function (record) {
           record.isOn = isOn;
           res.json({'relay': record});
         });
       });
     } catch (err) {
-      if (err.message === "Something went wrong"){
+      if (err.message === "Something went wrong") {
 
       } else {
         throw err;
@@ -255,11 +274,10 @@ router.route('/relays/:id')
   });
 
 
-// all of our routes will be prefixed with /api/v1
-api.use('/api/v1', router);
+process.on("exit", function(){
+  console.log("exiting");
+});
 
-models.sequelize.sync().then(function () {
-  api.listen(port, function () {
-    console.log('Express server listening on port ' + port);
-  });
+process.on("SIGINT", function(){
+  console.log("exiting, sigint");
 });
