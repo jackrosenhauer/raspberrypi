@@ -104,19 +104,25 @@ RelayScheduler.prototype.setupTasks = function () {
 
 RelayScheduler.prototype.scheduleNextAction = function(){
   let self = this;
-  if (self.currentTask !== null){
+  let timeUntilAction;
+  if (self.currentTask){
     //schedule the off action
-    let timeUntilAction = self.getTimeDifferenceInMS(self.currentTask['on'], self.getCurrentTimeInMS());
-    console.log("ms until next action: " + timeUntilAction);
-  } else if (self.nextTask !== null){
-    //schedule the on action
-    console.log(self.nextTask['on']);
-    console.log(self.getCurrentTimeInMS());
-    let timeUntilAction = self.getTimeDifferenceInMS(self.nextTask['on'], self.getCurrentTimeInMS());
+    timeUntilAction = self.getTimeDifferenceInMS(self.currentTask['on'], self.getCurrentTimeInMS());
+
     console.log("ms until next action: " + timeUntilAction);
   } else {
+    //schedule the on action
 
+    console.log(self.nextTask['on']);
+    console.log(self.getCurrentTimeInMS());
+
+    timeUntilAction = self.getTimeDifferenceInMS(self.nextTask['on'], self.getCurrentTimeInMS());
+
+    console.log("ms until next action: " + timeUntilAction);
   }
+
+  setTimeout
+
 };
 
 RelayScheduler.prototype.getCurrentTimeInMS = function(){
