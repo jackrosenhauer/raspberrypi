@@ -1,10 +1,10 @@
 {
-  "name": "GrowPI Server",
+  "name": "GrowPIServer",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/.bin/mocha --reporter spec"
   },
   "author": "",
   "license": "ISC",
@@ -17,5 +17,9 @@
     "jsonapi-serializer": "^3.4.1",
     "pg": "^6.1.0",
     "sequelize": "^3.27.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0"
   }
 }
