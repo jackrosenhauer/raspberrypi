@@ -107,7 +107,7 @@ RelayScheduler.prototype.scheduleNextAction = function(){
   let timeUntilAction;
   if (self.currentTask){
     //schedule the off action
-    timeUntilAction = self.getTimeDifferenceInMS(self.currentTask['on'], self.getCurrentTimeInMS());
+    timeUntilAction = self.getTimeDifferenceInMS(self.currentTask['off'], self.getCurrentTimeInMS());
 
     console.log("ms until next action: " + timeUntilAction);
   } else {
@@ -121,7 +121,10 @@ RelayScheduler.prototype.scheduleNextAction = function(){
     console.log("ms until next action: " + timeUntilAction);
   }
 
-  setTimeout
+  setTimeout(() => {
+    self.setupTasks();
+    self.scheduleNextAction();
+  }, timeUntilAction);
 
 };
 
