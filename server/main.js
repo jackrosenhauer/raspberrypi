@@ -25,6 +25,18 @@ api.use(bodyParser.json());
 // all of our routes will be prefixed with /api/v1
 api.use('/api/v1', router);
 
+api.use(cors());
+
+router.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT ,DELETE');
+
+  // do logging
+  console.log('Check for auth here?');
+  next(); // make sure we go to the next routes and don't stop here
+});
+
 //Temp range and Humidity range
 let minTemp = 65;
 let maxTemp = 85;
@@ -108,14 +120,6 @@ controller.on("update", function (status) {
   // console.log(status);
 });
 
-router.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-
-  // do logging
-  console.log('Check for auth here?');
-  next(); // make sure we go to the next routes and don't stop here
-});
 
 function getAttributesForModel(model) {
   return Object.keys(model.rawAttributes).filter(function (key) {
