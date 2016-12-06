@@ -33,7 +33,7 @@ router.use(function (req, res, next) {
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT ,DELETE');
 
   // do logging
-  console.log('Check for auth here?');
+  //console.log('Check for auth here?');
   next(); // make sure we go to the next routes and don't stop here
 });
 
@@ -261,20 +261,27 @@ router.route('/relays/:id')
     let isOn = req.body.relay.isOn;
     console.log(id, isOn);
 
-    try {
-      controller.changeRelayState(id, isOn, function () {
-        Relay.find({where: {id: id}}).then(function (record) {
-          record.isOn = isOn;
-          res.json({'relay': record});
-        });
+    Relay.find({where: {id: id}}).then(function(record){
+      controller.changeRelayState(record.name, isOn, function(){
+        record.isOn = isOn;
+        res.json({'relay': record});
       });
-    } catch (err) {
-      if (err.message === "Something went wrong") {
 
-      } else {
-        throw err;
-      }
-    }
+    });
+    // try {
+    //   controller.changeRelayState(id, isOn, function () {
+    //     Relay.find({where: {id: id}}).then(function (record) {
+    //       record.isOn = isOn;
+    //       res.json({'relay': record});
+    //     });
+    //   });
+    // } catch (err) {
+    //   if (err.message === "Something went wrong") {
+    //
+    //   } else {
+    //     throw err;
+    //   }
+    // }
   });
 
 

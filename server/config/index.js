@@ -23,7 +23,7 @@ module.exports ={
     'relay3': {
       'webName': 'Lightning',
       'schedule': [
-        {'on': '07:00:00', 'off': '19:00:00'}
+        {'on': '09:00:00', 'off': '21:00:00'}
       ]
     },
     'sensor': {
