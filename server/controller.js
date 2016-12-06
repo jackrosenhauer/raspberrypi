@@ -37,7 +37,7 @@ Controller.prototype.setupBoard = function () {
 
   //self.relays = new five.Relays([3, 2, 4, 5, 6, 7, 8, 9]);
   self.relays = new five.Relays({
-    "pins": [3, 2, 4, 5, 6, 7, 8, 9],
+    "pins": [3, 2, 5, 4, 6, 7, 9, 8],
     "type": "NO"
   });
   self.relays.forEach(function (relay, index) {
